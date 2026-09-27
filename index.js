@@ -10,94 +10,236 @@ const client = new Client({
 
 
 // ======================================================
-// LISTA DE PRECIOS
-// precio = precio total que paga el cliente
-// caja   = cantidad que se deposita en caja
+// PRODUCTOS
+// nombre   = nombre oficial
+// aliases  = formas alternativas que puedes escribir
+// precio   = precio que paga el cliente
+// caja     = cantidad que se deposita en caja
 // ======================================================
 
-const precios = {
+const productos = [
 
   // REVOLVERS
-  "cattleman": { precio: 9, caja: 8 },
-  "doble accion": { precio: 31.50, caja: 15 },
-  "schofield": { precio: 76.50, caja: 46.50 },
-  "lemat": { precio: 99, caja: 39 },
-  "navy": { precio: 144, caja: 54 },
+  {
+    nombre: "Revolver Cattleman",
+    aliases: ["cattleman"],
+    precio: 9,
+    caja: 8
+  },
+  {
+    nombre: "Revolver Doble Acción",
+    aliases: ["doble accion"],
+    precio: 31.50,
+    caja: 15
+  },
+  {
+    nombre: "Revolver Schofield",
+    aliases: ["schofield"],
+    precio: 76.50,
+    caja: 46.50
+  },
+  {
+    nombre: "Revolver Lemat",
+    aliases: ["lemat"],
+    precio: 99,
+    caja: 39
+  },
+  {
+    nombre: "Revolver Navy",
+    aliases: ["navy"],
+    precio: 144,
+    caja: 54
+  },
 
 
   // PISTOLAS
-  "volcanic": { precio: 31.50, caja: 16.50 },
-  "semi-automatica": { precio: 76.50, caja: 31.50 },
-  "mauser": { precio: 76.50, caja: 31.50 },
-  "m-1899": { precio: 99, caja: 39 },
+  {
+    nombre: "Pistola Volcanic",
+    aliases: ["volcanic"],
+    precio: 31.50,
+    caja: 16.50
+  },
+  {
+    nombre: "Pistola Semi-Automática",
+    aliases: ["semi-automatica", "semi automatica"],
+    precio: 76.50,
+    caja: 31.50
+  },
+  {
+    nombre: "Pistola Mauser",
+    aliases: ["mauser"],
+    precio: 76.50,
+    caja: 31.50
+  },
+  {
+    nombre: "Pistola M-1899",
+    aliases: ["m-1899", "m1899"],
+    precio: 99,
+    caja: 39
+  },
 
 
   // RIFLES
-  "varmint": { precio: 81, caja: 51 },
-  "springfield": { precio: 328, caja: 133.50 },
-  "cerrojo": { precio: 396, caja: 156 },
-  "mata elefantes": { precio: 441, caja: 171 },
+  {
+    nombre: "Rifle Varmint",
+    aliases: ["varmint"],
+    precio: 81,
+    caja: 51
+  },
+  {
+    nombre: "Rifle Springfield",
+    aliases: ["springfield"],
+    precio: 328,
+    caja: 133.50
+  },
+  {
+    nombre: "Rifle Cerrojo",
+    aliases: ["cerrojo"],
+    precio: 396,
+    caja: 156
+  },
+  {
+    nombre: "Rifle Mata Elefantes",
+    aliases: ["mata elefantes", "mataelefantes"],
+    precio: 441,
+    caja: 171
+  },
 
 
   // CARABINAS
-  "carabina spencer": { precio: 153, caja: 63 },
-  "linchfield (henry)": { precio: 198, caja: 78 },
-  "repetidora evans": { precio: 198, caja: 78 },
-  "winchester": { precio: 243, caja: 93 },
+  {
+    nombre: "Carabina Spencer",
+    aliases: ["carabina", "spencer", "carabina spencer"],
+    precio: 153,
+    caja: 63
+  },
+  {
+    nombre: "Linchfield (Henry)",
+    aliases: ["henry", "linchfield"],
+    precio: 198,
+    caja: 78
+  },
+  {
+    nombre: "Repetidora Evans",
+    aliases: ["evans", "repetidora evans"],
+    precio: 198,
+    caja: 78
+  },
+  {
+    nombre: "Winchester",
+    aliases: ["winchester"],
+    precio: 243,
+    caja: 93
+  },
 
 
   // ESCOPETAS
-  "escopeta recortada": { precio: 267, caja: 102 },
-  "escopeta doble cañon": { precio: 322.50, caja: 157.50 },
-  "escopeta repeticion": { precio: 432, caja: 162 },
-  "escopeta pump/corredera": { precio: 454.50, caja: 169.50 },
-  "escopeta semi-automatica": { precio: 454.50, caja: 169.50 },
+  {
+    nombre: "Escopeta Recortada",
+    aliases: ["recortada"],
+    precio: 267,
+    caja: 102
+  },
+  {
+    nombre: "Escopeta Doble Cañón",
+    aliases: ["doble cañon escopeta", "escopeta doble cañon"],
+    precio: 322.50,
+    caja: 157.50
+  },
+  {
+    nombre: "Escopeta Repetición",
+    aliases: ["repeticion", "escopeta repeticion"],
+    precio: 432,
+    caja: 162
+  },
+  {
+    nombre: "Escopeta Pump/Corredera",
+    aliases: ["pump", "corredera", "pump/corredera"],
+    precio: 454.50,
+    caja: 169.50
+  },
+  {
+    nombre: "Escopeta Semi-Automática",
+    aliases: [
+      "escopeta semiautomatica",
+      "escopeta semi automatica",
+      "escopeta semi-automatica"
+    ],
+    precio: 454.50,
+    caja: 169.50
+  },
 
 
   // EXTRAS
-  // Estos productos no generan beneficio:
-  // todo lo cobrado se deposita en caja.
-
-  "municiones revolver/pistola": {
+  {
+    nombre: "Municiones Revolver/Pistola",
+    aliases: [
+      "municion revolver",
+      "municion pistola",
+      "balas revolver",
+      "balas pistola"
+    ],
     precio: 0.63,
     caja: 0.63
   },
-
-  "municion de escopeta": {
+  {
+    nombre: "Munición de Escopeta",
+    aliases: [
+      "municion escopeta",
+      "cartuchos escopeta"
+    ],
     precio: 1.35,
     caja: 1.35
   },
-
-  "municion varmint": {
+  {
+    nombre: "Munición Varmint",
+    aliases: ["municion varmint"],
     precio: 1.35,
     caja: 1.35
   },
-
-  "municion rifle/repetidora": {
+  {
+    nombre: "Munición Rifle/Repetidora",
+    aliases: [
+      "municion rifle",
+      "municion repetidora"
+    ],
     precio: 1.35,
     caja: 1.35
   },
-
-  "municion tranquilizante": {
+  {
+    nombre: "Munición Tranquilizante",
+    aliases: [
+      "municion tranquilizante",
+      "tranquilizantes"
+    ],
     precio: 1.35,
     caja: 1.35
   },
-
-  "municion mataelefante": {
+  {
+    nombre: "Munición MataElefante",
+    aliases: [
+      "municion mataelefante",
+      "municion mata elefantes"
+    ],
     precio: 1.50,
     caja: 1.50
   },
-
-  "aceites": {
+  {
+    nombre: "Aceites",
+    aliases: [
+      "aceite",
+      "aceites",
+      "aceite para armas"
+    ],
     precio: 2.16,
     caja: 2.16
   }
-};
+];
 
 
 // ======================================================
 // NORMALIZAR TEXTO
-// Permite escribir mayúsculas/minúsculas y con/sin acentos
+// Quita mayúsculas y tildes
 // ======================================================
 
 function normalizar(texto) {
@@ -106,6 +248,12 @@ function normalizar(texto) {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .trim();
+}
+
+
+// Evita problemas con caracteres especiales del RegExp
+function escaparRegex(texto) {
+  return texto.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 
@@ -124,7 +272,6 @@ client.once("ready", () => {
 
 client.on("messageCreate", async (message) => {
 
-  // Ignorar mensajes enviados por bots
   if (message.author.bot) return;
 
   const texto = normalizar(message.content);
@@ -139,43 +286,56 @@ client.on("messageCreate", async (message) => {
   // BUSCAR PRODUCTOS
   // ====================================================
 
-  for (const [producto, datos] of Object.entries(precios)) {
+  for (const producto of productos) {
 
-    const productoNormalizado = normalizar(producto);
+    let encontrado = false;
 
-    // Ejemplo:
-    // cattleman 2
-    // lemat 3
-    // escopeta pump/corredera 1
+    // También añadimos el nombre oficial a las búsquedas
+    const nombresBusqueda = [
+      producto.nombre,
+      ...producto.aliases
+    ];
 
-    const regex = new RegExp(
-      `\\b${productoNormalizado.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*(\\d+)`,
-      "gi"
-    );
-
-    const coincidencias = [...texto.matchAll(regex)];
+    // Primero probamos los nombres más largos
+    nombresBusqueda.sort((a, b) => b.length - a.length);
 
 
-    for (const coincidencia of coincidencias) {
+    for (const alias of nombresBusqueda) {
 
-      const cantidad = parseInt(
-        coincidencia[1]
+      if (encontrado) break;
+
+      const aliasNormalizado = normalizar(alias);
+
+      const regex = new RegExp(
+        `\\b${escaparRegex(aliasNormalizado)}\\s*[xX]?\\s*(\\d+)\\b`,
+        "i"
       );
 
-      const subtotalCliente =
-        cantidad * datos.precio;
-
-      const subtotalCaja =
-        cantidad * datos.caja;
+      const coincidencia = texto.match(regex);
 
 
-      totalCliente += subtotalCliente;
-      totalCaja += subtotalCaja;
+      if (coincidencia) {
+
+        const cantidad = parseInt(coincidencia[1]);
+
+        const subtotalCliente =
+          cantidad * producto.precio;
+
+        const subtotalCaja =
+          cantidad * producto.caja;
 
 
-      detalles.push(
-        `${producto} x${cantidad} = $${subtotalCliente.toFixed(2)}`
-      );
+        totalCliente += subtotalCliente;
+        totalCaja += subtotalCaja;
+
+
+        detalles.push(
+          `${producto.nombre} x${cantidad} = $${subtotalCliente.toFixed(2)}`
+        );
+
+
+        encontrado = true;
+      }
     }
   }
 
@@ -207,7 +367,6 @@ client.on("messageCreate", async (message) => {
 
 // ======================================================
 // INICIAR BOT
-// Token almacenado en Railway
 // ======================================================
 
 client.login(process.env.DISCORD_TOKEN);

@@ -272,7 +272,17 @@ client.once("ready", () => {
 
 client.on("messageCreate", async (message) => {
 
+  // Ignorar mensajes de otros bots
   if (message.author.bot) return;
+
+
+  // ====================================================
+  // SOLO FUNCIONAR EN EL CANAL DE VENTAS
+  // ID: 1247246221702205571
+  // ====================================================
+
+  if (message.channel.id !== "1247246221702205571") return;
+
 
   const texto = normalizar(message.content);
 

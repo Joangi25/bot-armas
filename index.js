@@ -284,6 +284,7 @@ client.on("messageCreate", async (message) => {
 
   // ====================================================
   // BUSCAR PRODUCTOS
+  // Si no se indica cantidad, se cuenta como 1 unidad
   // ====================================================
 
   for (const producto of productos) {
@@ -307,7 +308,7 @@ client.on("messageCreate", async (message) => {
       const aliasNormalizado = normalizar(alias);
 
       const regex = new RegExp(
-        `\\b${escaparRegex(aliasNormalizado)}\\s*[xX]?\\s*(\\d+)\\b`,
+        `\\b${escaparRegex(aliasNormalizado)}(?:\\s*[xX]?\\s*(\\d+))?\\b`,
         "i"
       );
 
@@ -316,7 +317,12 @@ client.on("messageCreate", async (message) => {
 
       if (coincidencia) {
 
-        const cantidad = parseInt(coincidencia[1]);
+        // Si hay un número, usa ese número.
+        // Si no hay número, cuenta 1 unidad.
+        const cantidad = coincidencia[1]
+          ? parseInt(coincidencia[1], 10)
+          : 1;
+
 
         const subtotalCliente =
           cantidad * producto.precio;

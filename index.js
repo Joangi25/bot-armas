@@ -341,7 +341,6 @@ const packs = [
 
 
   // COMBO CABALLERO
-  // El reparto cambia según el arma elegida.
 
   {
     nombre: "Combo Caballero - Schofield",
@@ -377,7 +376,6 @@ const packs = [
 
 
   // LEYENDA DEL OESTE
-  // Pump y Semi tienen el mismo valor de caja.
 
   {
     nombre: "Leyenda del Oeste",
@@ -433,7 +431,6 @@ client.on("messageCreate", async (message) => {
 
   // ====================================================
   // SOLO FUNCIONAR EN EL CANAL DE VENTAS
-  // ID: 1247246221702205571
   // ====================================================
 
   if (message.channel.id !== "1247246221702205571") return;
@@ -446,127 +443,162 @@ client.on("messageCreate", async (message) => {
 
   const detalles = [];
 
-  let packEncontrado = false;
-
 
   // ====================================================
-  // BUSCAR PACKS PRIMERO
+  // BUSCAR PACKS Y PRODUCTOS A LA VEZ
   // ====================================================
 
-  for (const pack of packs) {
-
-    let encontrado = false;
-
-    const nombresBusqueda = [
-      pack.nombre,
-      ...pack.aliases
-    ];
-
-    nombresBusqueda.sort((a, b) => b.length - a.length);
+  const coincidencias = [];
 
 
-    for (const alias of nombresBusqueda) {
+  function buscarCoincidencias(lista, tipo) {
 
-      if (encontrado) break;
-
-      const aliasNormalizado = normalizar(alias);
-
-      const regex = new RegExp(
-        `\\b${escaparRegex(aliasNormalizado)}(?:\\s*[xX]?\\s*(\\d+))?\\b`,
-        "i"
-      );
-
-      const coincidencia = texto.match(regex);
-
-
-      if (coincidencia) {
-
-        const cantidad = coincidencia[1]
-          ? parseInt(coincidencia[1], 10)
-          : 1;
-
-
-        const subtotalCliente =
-          cantidad * pack.precio;
-
-        const subtotalCaja =
-          cantidad * pack.caja;
-
-
-        totalCliente += subtotalCliente;
-        totalCaja += subtotalCaja;
-
-
-        detalles.push(
-          `📦 ${pack.nombre} x${cantidad} = $${subtotalCliente.toFixed(2)}`
-        );
-
-
-        encontrado = true;
-        packEncontrado = true;
-      }
-    }
-  }
-
-
-  // ====================================================
-  // SI NO HAY PACK, BUSCAR PRODUCTOS NORMALES
-  // ====================================================
-
-  if (!packEncontrado) {
-
-    for (const producto of productos) {
-
-      let encontrado = false;
+    for (const item of lista) {
 
       const nombresBusqueda = [
-        producto.nombre,
-        ...producto.aliases
+        item.nombre,
+        ...item.aliases
       ];
 
-      nombresBusqueda.sort((a, b) => b.length - a.length);
+      // Eliminar aliases repetidos
+      const aliasesUnicos = [
+        ...new Set(
+          nombresBusqueda.map(nombre => normalizar(nombre))
+        )
+      ];
 
 
-      for (const alias of nombresBusqueda) {
-
-        if (encontrado) break;
-
-        const aliasNormalizado = normalizar(alias);
+      for (const aliasNormalizado of aliasesUnicos) {
 
         const regex = new RegExp(
           `\\b${escaparRegex(aliasNormalizado)}(?:\\s*[xX]?\\s*(\\d+))?\\b`,
-          "i"
+          "gi"
         );
 
-        const coincidencia = texto.match(regex);
+        let coincidencia;
 
 
-        if (coincidencia) {
+        while ((coincidencia = regex.exec(texto)) !== null) {
 
           const cantidad = coincidencia[1]
             ? parseInt(coincidencia[1], 10)
             : 1;
 
 
-          const subtotalCliente =
-            cantidad * producto.precio;
+          coincidencias.push({
+            tipo,
+            item,
+            cantidad,
 
-          const subtotalCaja =
-            cantidad * producto.caja;
+            inicio: coincidencia.index,
+
+            fin:
+              coincidencia.index +
+              coincidencia[0].length,
+
+            longitudAlias:
+              aliasNormalizado.length
+          });
 
 
-          totalCliente += subtotalCliente;
-          totalCaja += subtotalCaja;
-
-
-          detalles.push(
-            `${producto.nombre} x${cantidad} = $${subtotalCliente.toFixed(2)}`
-          );
-
-
-          encontrado = true;
+          if (coincidencia[0].length === 0) {
+            regex.lastIndex++;
+          }
         }
       }
+    }
+  }
+
+
+  // Buscar todos los combos
+  buscarCoincidencias(packs, "pack");
+
+  // Buscar todas las armas y extras
+  buscarCoincidencias(productos, "producto");
+
+
+  // ====================================================
+  // EVITAR CRUCES Y DOBLES CONTEOS
+  // ====================================================
+
+  coincidencias.sort((a, b) => {
+
+    // Primero: lo que aparezca antes en el mensaje
+    if (a.inicio !== b.inicio) {
+      return a.inicio - b.inicio;
+    }
+
+    // Si empiezan en el mismo sitio:
+    // gana el nombre más largo/específico
+    return b.longitudAlias - a.longitudAlias;
+  });
+
+
+  const aceptadas = [];
+
+
+  for (const candidata of coincidencias) {
+
+    const seCruza = aceptadas.some(aceptada => {
+
+      return (
+        candidata.inicio < aceptada.fin &&
+        candidata.fin > aceptada.inicio
+      );
+
+    });
+
+
+    // Solo aceptar si no pisa una coincidencia
+    // que ya haya sido reconocida
+    if (!seCruza) {
+      aceptadas.push(candidata);
+    }
+  }
+
+
+  // Mantener el mismo orden en que el usuario
+  // escribió los productos
+  aceptadas.sort((a, b) => a.inicio - b.inicio);
+
+
+  // ====================================================
+  // CALCULAR
+  // ====================================================
+
+  for (const encontrada of aceptadas) {
+
+    const {
+      tipo,
+      item,
+      cantidad
+    } = encontrada;
+
+
+    const subtotalCliente =
+      cantidad * item.precio;
+
+
+    const subtotalCaja =
+      cantidad * item.caja;
+
+
+    totalCliente += subtotalCliente;
+    totalCaja += subtotalCaja;
+
+
+    if (tipo === "pack") {
+
+      detalles.push(
+        `📦 ${item.nombre} x${cantidad} = $${subtotalCliente.toFixed(2)}`
+      );
+
+    } else {
+
+      detalles.push(
+        `${item.nombre} x${cantidad} = $${subtotalCliente.toFixed(2)}`
+      );
+
     }
   }
 

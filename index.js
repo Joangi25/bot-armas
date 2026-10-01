@@ -238,6 +238,161 @@ const productos = [
 
 
 // ======================================================
+// PACKS / COMBOS
+// Precio especial según el cartel
+// ======================================================
+
+const packs = [
+
+  // COMBOS CAZADOR
+
+  {
+    nombre: "Cazador Principiante",
+    aliases: [
+      "cazador principiante",
+      "combo cazador principiante"
+    ],
+    precio: 94,
+    caja: 64.94
+  },
+
+  {
+    nombre: "Cazador Intermedio",
+    aliases: [
+      "cazador intermedio",
+      "combo cazador intermedio"
+    ],
+    precio: 284,
+    caja: 137.10
+  },
+
+  {
+    nombre: "Cazador Experimentado",
+    aliases: [
+      "cazador experimentado",
+      "combo cazador experimentado"
+    ],
+    precio: 725,
+    caja: 321.60
+  },
+
+  {
+    nombre: "Combo Vinter",
+    aliases: [
+      "combo vinter",
+      "vinter"
+    ],
+    precio: 625,
+    caja: 270.99
+  },
+
+
+  // CUCHILLOS
+  // Sin margen para el vendedor
+
+  {
+    nombre: "5 Cuchillos Arrojadizos",
+    aliases: [
+      "cuchillos arrojadizos",
+      "5 cuchillos arrojadizos",
+      "pack cuchillos",
+      "pack cuchillos arrojadizos"
+    ],
+    precio: 7,
+    caja: 7
+  },
+
+
+  // COMBOS DEL OESTE
+
+  {
+    nombre: "Jinete del Oeste - Opción A",
+    aliases: [
+      "jinete del oeste a",
+      "jinete opcion a",
+      "jinete a",
+      "combo jinete a"
+    ],
+    precio: 43,
+    caja: 25.52
+  },
+
+  {
+    nombre: "Jinete del Oeste - Opción B",
+    aliases: [
+      "jinete del oeste b",
+      "jinete opcion b",
+      "jinete b",
+      "combo jinete b"
+    ],
+    precio: 43,
+    caja: 27.02
+  },
+
+  {
+    nombre: "Combo Forajido",
+    aliases: [
+      "combo forajido",
+      "forajido"
+    ],
+    precio: 292,
+    caja: 111.78
+  },
+
+
+  // COMBO CABALLERO
+  // El reparto cambia según el arma elegida.
+
+  {
+    nombre: "Combo Caballero - Schofield",
+    aliases: [
+      "combo caballero schofield",
+      "caballero schofield"
+    ],
+    precio: 346,
+    caja: 152.70
+  },
+
+  {
+    nombre: "Combo Caballero - Mauser",
+    aliases: [
+      "combo caballero mauser",
+      "caballero mauser"
+    ],
+    precio: 346,
+    caja: 137.70
+  },
+
+  {
+    nombre: "Combo Caballero - Semi-Automática",
+    aliases: [
+      "combo caballero semi",
+      "combo caballero semi automatica",
+      "combo caballero semiautomatica",
+      "caballero semi"
+    ],
+    precio: 346,
+    caja: 137.70
+  },
+
+
+  // LEYENDA DEL OESTE
+  // Pump y Semi tienen el mismo valor de caja.
+
+  {
+    nombre: "Leyenda del Oeste",
+    aliases: [
+      "leyenda del oeste",
+      "combo leyenda del oeste",
+      "leyenda"
+    ],
+    precio: 1110,
+    caja: 418.50
+  }
+];
+
+
+// ======================================================
 // NORMALIZAR TEXTO
 // Quita mayúsculas y tildes
 // ======================================================
@@ -291,23 +446,22 @@ client.on("messageCreate", async (message) => {
 
   const detalles = [];
 
+  let packEncontrado = false;
+
 
   // ====================================================
-  // BUSCAR PRODUCTOS
-  // Si no se indica cantidad, se cuenta como 1 unidad
+  // BUSCAR PACKS PRIMERO
   // ====================================================
 
-  for (const producto of productos) {
+  for (const pack of packs) {
 
     let encontrado = false;
 
-    // También añadimos el nombre oficial a las búsquedas
     const nombresBusqueda = [
-      producto.nombre,
-      ...producto.aliases
+      pack.nombre,
+      ...pack.aliases
     ];
 
-    // Primero probamos los nombres más largos
     nombresBusqueda.sort((a, b) => b.length - a.length);
 
 
@@ -327,18 +481,16 @@ client.on("messageCreate", async (message) => {
 
       if (coincidencia) {
 
-        // Si hay un número, usa ese número.
-        // Si no hay número, cuenta 1 unidad.
         const cantidad = coincidencia[1]
           ? parseInt(coincidencia[1], 10)
           : 1;
 
 
         const subtotalCliente =
-          cantidad * producto.precio;
+          cantidad * pack.precio;
 
         const subtotalCaja =
-          cantidad * producto.caja;
+          cantidad * pack.caja;
 
 
         totalCliente += subtotalCliente;
@@ -346,11 +498,74 @@ client.on("messageCreate", async (message) => {
 
 
         detalles.push(
-          `${producto.nombre} x${cantidad} = $${subtotalCliente.toFixed(2)}`
+          `📦 ${pack.nombre} x${cantidad} = $${subtotalCliente.toFixed(2)}`
         );
 
 
         encontrado = true;
+        packEncontrado = true;
+      }
+    }
+  }
+
+
+  // ====================================================
+  // SI NO HAY PACK, BUSCAR PRODUCTOS NORMALES
+  // ====================================================
+
+  if (!packEncontrado) {
+
+    for (const producto of productos) {
+
+      let encontrado = false;
+
+      const nombresBusqueda = [
+        producto.nombre,
+        ...producto.aliases
+      ];
+
+      nombresBusqueda.sort((a, b) => b.length - a.length);
+
+
+      for (const alias of nombresBusqueda) {
+
+        if (encontrado) break;
+
+        const aliasNormalizado = normalizar(alias);
+
+        const regex = new RegExp(
+          `\\b${escaparRegex(aliasNormalizado)}(?:\\s*[xX]?\\s*(\\d+))?\\b`,
+          "i"
+        );
+
+        const coincidencia = texto.match(regex);
+
+
+        if (coincidencia) {
+
+          const cantidad = coincidencia[1]
+            ? parseInt(coincidencia[1], 10)
+            : 1;
+
+
+          const subtotalCliente =
+            cantidad * producto.precio;
+
+          const subtotalCaja =
+            cantidad * producto.caja;
+
+
+          totalCliente += subtotalCliente;
+          totalCaja += subtotalCaja;
+
+
+          detalles.push(
+            `${producto.nombre} x${cantidad} = $${subtotalCliente.toFixed(2)}`
+          );
+
+
+          encontrado = true;
+        }
       }
     }
   }

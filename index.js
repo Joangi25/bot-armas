@@ -11,10 +11,6 @@ const client = new Client({
 
 // ======================================================
 // PRODUCTOS
-// nombre   = nombre oficial
-// aliases  = formas alternativas que puedes escribir
-// precio   = precio que paga el cliente
-// caja     = cantidad que se deposita en caja
 // ======================================================
 
 const productos = [
@@ -51,7 +47,6 @@ const productos = [
     caja: 54
   },
 
-
   // PISTOLAS
   {
     nombre: "Pistola Volcanic",
@@ -77,7 +72,6 @@ const productos = [
     precio: 99,
     caja: 39
   },
-
 
   // RIFLES
   {
@@ -105,7 +99,6 @@ const productos = [
     caja: 171
   },
 
-
   // CARABINAS
   {
     nombre: "Carabina Spencer",
@@ -131,7 +124,6 @@ const productos = [
     precio: 243,
     caja: 93
   },
-
 
   // ESCOPETAS
   {
@@ -168,7 +160,6 @@ const productos = [
     precio: 454.50,
     caja: 169.50
   },
-
 
   // EXTRAS
   {
@@ -239,12 +230,9 @@ const productos = [
 
 // ======================================================
 // PACKS / COMBOS
-// Precio especial según el cartel
 // ======================================================
 
 const packs = [
-
-  // COMBOS CAZADOR
 
   {
     nombre: "Cazador Principiante",
@@ -286,10 +274,6 @@ const packs = [
     caja: 270.99
   },
 
-
-  // CUCHILLOS
-  // Sin margen para el vendedor
-
   {
     nombre: "5 Cuchillos Arrojadizos",
     aliases: [
@@ -301,9 +285,6 @@ const packs = [
     precio: 7,
     caja: 7
   },
-
-
-  // COMBOS DEL OESTE
 
   {
     nombre: "Jinete del Oeste - Opción A",
@@ -339,9 +320,6 @@ const packs = [
     caja: 111.78
   },
 
-
-  // COMBO CABALLERO
-
   {
     nombre: "Combo Caballero - Schofield",
     aliases: [
@@ -374,9 +352,6 @@ const packs = [
     caja: 137.70
   },
 
-
-  // LEYENDA DEL OESTE
-
   {
     nombre: "Leyenda del Oeste",
     aliases: [
@@ -392,7 +367,6 @@ const packs = [
 
 // ======================================================
 // NORMALIZAR TEXTO
-// Quita mayúsculas y tildes
 // ======================================================
 
 function normalizar(texto) {
@@ -404,7 +378,6 @@ function normalizar(texto) {
 }
 
 
-// Evita problemas con caracteres especiales del RegExp
 function escaparRegex(texto) {
   return texto.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
@@ -414,8 +387,9 @@ function escaparRegex(texto) {
 // BOT CONECTADO
 // ======================================================
 
-client.once("ready", () => {
+client.once("clientReady", () => {
   console.log(`Bot conectado como ${client.user.tag}`);
+  console.log("Bot preparado para recibir mensajes.");
 });
 
 
@@ -425,16 +399,15 @@ client.once("ready", () => {
 
 client.on("messageCreate", async (message) => {
 
-  // Ignorar mensajes de otros bots
   if (message.author.bot) return;
 
+  // IMPORTANTE:
+  // TEMPORALMENTE NO RESTRINGIMOS EL BOT A UN CANAL.
+  // Así comprobamos si el problema era el ID del canal.
 
-  // ====================================================
-  // SOLO FUNCIONAR EN EL CANAL DE VENTAS
-  // ====================================================
-
-  if (message.channel.id !== "1247246221702205571") return;
-
+  console.log(
+    `Mensaje recibido | Canal: ${message.channel.id} | Usuario: ${message.author.tag} | Texto: ${message.content}`
+  );
 
   const texto = normalizar(message.content);
 
@@ -442,12 +415,6 @@ client.on("messageCreate", async (message) => {
   let totalCaja = 0;
 
   const detalles = [];
-
-
-  // ====================================================
-  // BUSCAR PACKS Y PRODUCTOS A LA VEZ
-  // ====================================================
-
   const coincidencias = [];
 
 
@@ -460,7 +427,6 @@ client.on("messageCreate", async (message) => {
         ...item.aliases
       ];
 
-      // Eliminar aliases repetidos
       const aliasesUnicos = [
         ...new Set(
           nombresBusqueda.map(nombre => normalizar(nombre))
@@ -489,15 +455,9 @@ client.on("messageCreate", async (message) => {
             tipo,
             item,
             cantidad,
-
             inicio: coincidencia.index,
-
-            fin:
-              coincidencia.index +
-              coincidencia[0].length,
-
-            longitudAlias:
-              aliasNormalizado.length
+            fin: coincidencia.index + coincidencia[0].length,
+            longitudAlias: aliasNormalizado.length
           });
 
 
@@ -510,26 +470,23 @@ client.on("messageCreate", async (message) => {
   }
 
 
-  // Buscar todos los combos
+  // Buscar combos
   buscarCoincidencias(packs, "pack");
 
-  // Buscar todas las armas y extras
+  // Buscar productos
   buscarCoincidencias(productos, "producto");
 
 
-  // ====================================================
+  // ======================================================
   // EVITAR CRUCES Y DOBLES CONTEOS
-  // ====================================================
+  // ======================================================
 
   coincidencias.sort((a, b) => {
 
-    // Primero: lo que aparezca antes en el mensaje
     if (a.inicio !== b.inicio) {
       return a.inicio - b.inicio;
     }
 
-    // Si empiezan en el mismo sitio:
-    // gana el nombre más largo/específico
     return b.longitudAlias - a.longitudAlias;
   });
 
@@ -549,22 +506,18 @@ client.on("messageCreate", async (message) => {
     });
 
 
-    // Solo aceptar si no pisa una coincidencia
-    // que ya haya sido reconocida
     if (!seCruza) {
       aceptadas.push(candidata);
     }
   }
 
 
-  // Mantener el mismo orden en que el usuario
-  // escribió los productos
   aceptadas.sort((a, b) => a.inicio - b.inicio);
 
 
-  // ====================================================
+  // ======================================================
   // CALCULAR
-  // ====================================================
+  // ======================================================
 
   for (const encontrada of aceptadas) {
 
@@ -603,9 +556,9 @@ client.on("messageCreate", async (message) => {
   }
 
 
-  // ====================================================
+  // ======================================================
   // RESPUESTA
-  // ====================================================
+  // ======================================================
 
   if (totalCliente > 0) {
 
@@ -623,8 +576,37 @@ client.on("messageCreate", async (message) => {
       `\n💵 **VENDEDOR: $${totalVendedor.toFixed(2)}**`;
 
 
-    await message.reply(respuesta);
+    try {
+
+      await message.reply(respuesta);
+
+      console.log("Respuesta enviada correctamente.");
+
+    } catch (error) {
+
+      console.error("ERROR AL RESPONDER:", error);
+
+    }
+
+  } else {
+
+    console.log(
+      "Mensaje recibido correctamente, pero no se encontró ningún producto."
+    );
   }
+});
+
+
+// ======================================================
+// ERRORES
+// ======================================================
+
+client.on("error", (error) => {
+  console.error("ERROR DEL CLIENTE DE DISCORD:", error);
+});
+
+process.on("unhandledRejection", (error) => {
+  console.error("ERROR NO CONTROLADO:", error);
 });
 
 

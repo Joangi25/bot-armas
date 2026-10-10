@@ -69,7 +69,7 @@ const productos = [
   {
     nombre: "Pistola M-1899",
     aliases: ["m-1899", "m1899"],
-    precio: 99,
+    precio: 100,
     caja: 39
   },
 
